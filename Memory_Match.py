@@ -1,11 +1,30 @@
-#Memory Match Game by Nathan Carmine
-
-import pygame
-from pygame.locals import *
-
-import time
+import tkinter as tk
+from tkinter import messagebox
 import random
-import os, pygame.mixer, pygame.time
+from datetime import datetime, timedelta
+
+# --- Game setup ---
+score = 0
+all_gates = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "B1", "B2", "B3", "B4", "B5"]
+available_gates = all_gates.copy()
+current_flight = None
+gate_buttons = {}
+occupied_gates = {}
+departure_timers = {}
+plane_labels = {}  # Track plane emoji labels for each gate
+departure_labels = {}  # Track departure notification labels for each gate
+game_time = None  # Current game time (9am to 5pm)
+game_time_start = None  # Start of shift
+game_time_end = None  # End of shift
+time_timer = None  # Timer for game clock
+assignment_timer = None  # Timer for 3-second countdown
+game_over = False  # Track if game is over
+countdown_remaining = 3  # Countdown seconds remaining
+
+narrowbody_aircraft = ["A220", "B737", "B757", "E175", "CRJ900", "B717", "A321"]
+widebody_aircraft = ["B777", "B787", "A350", "A330", "B767", "A380", "B787"]
+narrowbody_gates = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"]
+widebody_gates = ["B1", "B2", "B3", "B4", "B5"]
 
 #Checks if the cards match using their array indices
 def match_check(deck, flipped):
@@ -86,10 +105,10 @@ def main(runs):
     
     #Ensure the welcome message is displayed only on the first time through
     if runs == 0:
-        print "Welcome to Memory Match! Select two cards to flip them and find a match!"
-        print "Press 'q' to quit at any time."
+        print("Welcome to Memory Match! Select two cards to flip them and find a match!")
+        print("Press 'q' to quit at any time.")
     elif runs == 1:
-        print "\n\nNew Game"
+        print("\n\nNew Game")
 
     #"Global" variables used throughout the while loop
     flips = []
@@ -127,7 +146,7 @@ def main(runs):
                             for i in range(2):
                                 found.append(flips[i])
                                 visible_deck[6*flips[i][1]+flips[i][0]] = card_deck[6*flips[i][1]+flips[i][0]]
-                            print "Matches found: %d/15" % (len(found)/2)
+                            print("Matches found: %d/15" % (len(found)/2))
                             t = 0 #Allows user to immediately flip next card
                         else:
                             missed += 1
@@ -153,9 +172,9 @@ def main(runs):
 
         if len(found) == 30:
             found.append("WIN")
-            print "YOU WIN!"
-            print "Score: %d misses" % missed
-            print "\nPlay again? (y/n)" #User presses "y" or "n" in the card window
+            print("YOU WIN!")
+            print("Score: %d misses" % missed)
+            print("\nPlay again? (y/n)") #User presses "y" or "n" in the card window
             runs = 2
 
         if runs == 2: #Win mode of main
