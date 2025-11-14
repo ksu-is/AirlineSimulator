@@ -1,10 +1,37 @@
-# Memory_Match
-A memory match python game, written in pygame.
+Airport Operations Simulator
+A fast-paced airport gate management game built with Python and tkinter. Manage incoming flights and assign them to the correct gates during your 8-hour shift!
 
-The program works by having two decks: a visual deck and a hidden one. Upon game start, the visual deck holds the backsides of all the cards, and the hidden deck holds all the card faces. As the user finds matches, the two matching card faces from the hidden deck replace the card backs of the visual deck, thereby making them permanently visual. By the end of the game, the hidden deck has become the visual deck - all card faces are shown. When the user restarts the game, the visual deck is reset to the card backs, and a new, randomized hidden deck is created.
+Objective
+Survive a full 8-hour shift (9 AM - 5 PM) by correctly assigning flights to gates within 3 seconds.
 
-This program utilizes python 2.7 and package python-pygame (http://pygame.org/).
-As such, both must be installed to run.
-This game has only been tested on Ubuntu 14.04.
+Rules
+**Terminal A **: Narrowbody aircraft → Domestic destinations only
+**Terminal B **: Widebody aircraft → International destinations only
+You have 3 seconds to assign each flight to the correct gate
+Occupied gates are disabled and show the flight number
+Scoring System
+Narrowbody correct: +10 points
+Widebody correct: +20 points
+Wrong aircraft type: -5 points
+Timeout: -10 points
+Win/Lose Conditions
+Win: Complete your shift (reach 5 PM)
+Lose: Score drops below 0
+Getting Started
+Requirements
+Python 3.x
+tkinter
+Game Features
+Time-based gameplay: Real-time clock progression (9 AM - 5 PM)
+Visual feedback: Plane emojis, gate colors, departure notifications
+Automatic departures: Planes depart after 5-20 seconds
+Balanced difficulty: 60% narrowbody, 40% widebody flight distribution
+13 gates total: 8 narrowbody (A1-A8), 5 widebody (B1-B5)
+Aircraft Types
+Narrowbody: A320, 737, 757, E175, CRJ900, B717, B321
+Widebody: 777, 787, A350, A330, B747, A380, B787
 
-The images are not my original creation. They were taken from http://colome.org/ and spliced to make individual cards. Because of this, this program is under no license.
+Destinations
+Domestic (Narrowbody only): ATL, MSP, DTW, SLC, LAX, JFK, BOS, SEA, DEN, ORD, MIA, MCO, LAS, PHX, SFO, DCA, PDX, SAN, TPA, AUS, RDU, CLT, PHL, BWI
+
+International (Widebody only): LHR, CDG, AMS, FCO, BCN, MAD, FRA, MUC, HND, ICN, PVG, HKG, SYD, MEL, GRU, EZE, CUN, PUJ, MEX, YVR, YYZ, LIS, DUB, ZRH
