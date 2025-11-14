@@ -84,14 +84,6 @@ def main(runs):
     GAME_TITLE = "Python Memory Match"
     DESIRED_FPS = 60
 
-    #Setup preliminary pygame stuff
-    pygame.init()
-    screen = pygame.display.set_mode(DISPLAY_SIZE)
-    pygame.display.set_caption(GAME_TITLE)
-
-    fps_clock = pygame.time.Clock()
-
-    card_deck = cards_init() #initialize deck
 
     #Load card-back image for all cards at first, and have matches slowly unveiled
     card_back = pygame.image.load("./card_images/card_back.png")
