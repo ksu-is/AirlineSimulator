@@ -226,7 +226,6 @@ def update_countdown_display():
         countdown_remaining -= 1
         assignment_timer = root.after(1000, update_countdown_display)
     else:
-        # Time's up!
         assignment_timeout()
 
 def start_assignment_countdown():
@@ -391,12 +390,11 @@ score_label = tk.Label(header_frame, text=f"Score: {score}", font=("Arial", 10, 
                        bg="#34495e", fg="#2ecc71")
 score_label.pack(pady=2)
 
-# Countdown timer display (large and alarming)
+# Countdown timer display 
 countdown_label = tk.Label(header_frame, text="", font=("Arial", 20, "bold"),
                           bg="#34495e", fg="#3498db")
 countdown_label.pack(pady=5)
 
-# Airport map container (create but don't pack yet)
 map_frame = tk.Frame(root, bg="#2c3e50")
 
 # Terminal A - Left side (vertical, green)
@@ -553,7 +551,7 @@ def show_main_menu():
     credits.pack(pady=5)
     
     # Designer credit
-    designer = tk.Label(menu_frame, text="Game designed by Rowan Seskin",
+    designer = tk.Label(menu_frame, text="Game designed by Rowan Seskin and Gabrielle Godfrey",
                        font=("Arial", 8), bg="#2c3e50", fg="#7f8c8d")
     designer.pack(side=tk.BOTTOM, pady=10)
 
