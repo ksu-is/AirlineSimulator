@@ -52,9 +52,39 @@ def generate_flight():
         "SCL", "CPH", "NCE", "BER", "ARN", "LIS", "DUB", "ZRH"
     ]
     
+<<<<<<< HEAD
     # Randomly decide if this is a widebody flight (60% narrowbody, 40% widebody)
     # Ratio closer to gate availability: 8 narrowbody gates, 5 widebody gates
     use_widebody = random.random() < 0.40
+=======
+    cards.append(card_load('wild'))
+    joker_load = pygame.image.load("./card_images/joker.png")
+    cards.append(joker_load)
+
+    #Multiply the deck by two so there is one pair of everything
+    cards *= 2 #Python is great - just double the list to duplicate!
+
+    #Shuffle the deck for a new game every time
+    random.shuffle(cards)
+
+    return cards
+
+def main(runs):
+    DISPLAY_SIZE = (750, 905) 
+    GAME_TITLE = "Python Memory Match"
+    DESIRED_FPS = 60
+
+
+    #Load card-back image for all cards at first, and have matches slowly unveiled
+    card_back = pygame.image.load("./card_images/card_back.png")
+    visible_deck = []
+    for x in range(30):
+        visible_deck.append(card_back)
+
+    card_draw(visible_deck)
+
+    game_run = True #run the game
+>>>>>>> 107409dc03b63bb9a9cda9b2550af1c2ba72d44e
     
     if use_widebody:
         aircraft = random.choice(widebody_aircraft)
