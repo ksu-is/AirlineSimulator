@@ -1,10 +1,10 @@
 [x] Step 1: Evaluate different code repositories on GitHub to clone for the project. 
 [x] Step 2: Download and clone the repository from GitHub and review the code.
 [x] Step 3: Ensure repository is properly linked to GitHub and changes are reflecting accordingly.
-[] Step 4: 
-[] Step 5
-[] Step 6
-[] Step 7
-[] Step 8
-[] Step 9
-[] Step 10
+[x] Step 4: Use the Python 2 matching game as inspiration for a Python 3 game.
+[x] Step 5: Add tkinkter as used in class to create a GUI for the game.
+[x] Step 6: Develop unique aircraft types similar to those by an airline like Delta Air Lines.
+[x] Step 7: Create terminals for the flights, differentiated by those serving different aircraft types.
+[x] Step 8: Differentiate widebody and narrowbody aircraft to be assigned to their designated gates.
+[x] Step 9: Develop points scoring system to=allow for competitive advantages.
+[x] Step 10: Ensure airport code destinations are accurate and served by real flights.
