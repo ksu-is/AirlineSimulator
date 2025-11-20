@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 # --- Game setup ---
 score = 0
+lives = 3
 all_gates = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "B1", "B2", "B3", "B4", "B5"]
 available_gates = all_gates.copy()
 current_flight = None
@@ -52,39 +53,9 @@ def generate_flight():
         "SCL", "CPH", "NCE", "BER", "ARN", "LIS", "DUB", "ZRH"
     ]
     
-<<<<<<< HEAD
     # Randomly decide if this is a widebody flight (60% narrowbody, 40% widebody)
     # Ratio closer to gate availability: 8 narrowbody gates, 5 widebody gates
     use_widebody = random.random() < 0.40
-=======
-    cards.append(card_load('wild'))
-    joker_load = pygame.image.load("./card_images/joker.png")
-    cards.append(joker_load)
-
-    #Multiply the deck by two so there is one pair of everything
-    cards *= 2 #Python is great - just double the list to duplicate!
-
-    #Shuffle the deck for a new game every time
-    random.shuffle(cards)
-
-    return cards
-
-def main(runs):
-    DISPLAY_SIZE = (750, 905) 
-    GAME_TITLE = "Python Memory Match"
-    DESIRED_FPS = 60
-
-
-    #Load card-back image for all cards at first, and have matches slowly unveiled
-    card_back = pygame.image.load("./card_images/card_back.png")
-    visible_deck = []
-    for x in range(30):
-        visible_deck.append(card_back)
-
-    card_draw(visible_deck)
-
-    game_run = True #run the game
->>>>>>> 107409dc03b63bb9a9cda9b2550af1c2ba72d44e
     
     if use_widebody:
         aircraft = random.choice(widebody_aircraft)
@@ -122,7 +93,7 @@ def show_end_game_dialog(is_win, final_score):
         title_color = "#2ecc71"
     else:
         title_text = "❌ GAME OVER ❌"
-        message_text = "Your score dropped below 0!"
+        message_text = f"You lost all your lives!\n\nFinal Score: {final_score}"
         title_color = "#e74c3c"
     
     title_label = tk.Label(dialog, text=title_text, font=("Arial", 16, "bold"),
@@ -148,7 +119,7 @@ def show_end_game_dialog(is_win, final_score):
 
 def restart_game(dialog=None):
     """Restart the game from beginning"""
-    global score, available_gates, occupied_gates, departure_timers, current_flight
+    global score, lives, available_gates, occupied_gates, departure_timers, current_flight
     global game_time, game_time_start, game_time_end, game_over, assignment_timer, time_timer
     
     # Close dialog if exists
@@ -158,6 +129,7 @@ def restart_game(dialog=None):
     # Reset game state
     game_over = False
     score = 0
+    lives = 3
     available_gates = all_gates.copy()
     occupied_gates = {}
     departure_timers = {}
@@ -178,6 +150,7 @@ def restart_game(dialog=None):
     
     # Update displays
     score_label.config(text=f"Score: {score}")
+    lives_label.config(text="Lives: ❤️❤️❤️")
     time_label.config(text=f"Time: {game_time.strftime('%I:%M %p')}")
     result_label.config(text="")
     countdown_label.config(text="")
@@ -193,7 +166,7 @@ def restart_game(dialog=None):
     next_flight()
 
 def depart_plane(gate):
-    global score, game_over
+    global game_over
     if game_over:
         return
     
@@ -235,6 +208,11 @@ def update_game_time():
     # Schedule next time update (~0.833 seconds real time)
     time_timer = root.after(833, update_game_time)
 
+def update_lives_display():
+    """Update the lives display with hearts"""
+    hearts = "❤️" * lives
+    lives_label.config(text=f"Lives: {hearts}")
+
 def update_countdown_display():
     global countdown_remaining, assignment_timer, game_over
     if game_over:
@@ -268,17 +246,18 @@ def start_assignment_countdown():
     assignment_timer = root.after(1000, update_countdown_display)
 
 def assignment_timeout():
-    global score, game_over
+    global game_over, lives
     if game_over:
         return
     
-    # Lose 10 points for not assigning in time
-    score -= 10
-    score_label.config(text=f"Score: {score}")
-    result_label.config(text="⏰ Time's up! -10 points")
+    # Lose a life for timeout
+    lives -= 1
+    update_lives_display()
+    
+    result_label.config(text=f"⏰ Time's up! Lost 1 life | Lives remaining: {lives}")
     
     # Check for game over
-    if score < 0:
+    if lives <= 0:
         game_over = True
         show_end_game_dialog(False, score)
         return
@@ -328,7 +307,7 @@ def update_gate_display():
                 plane_labels[gate].config(text="")
 
 def assign_gate(gate):
-    global score, assignment_timer, game_over
+    global score, assignment_timer, game_over, lives
     if game_over:
         return
     
@@ -343,17 +322,19 @@ def assign_gate(gate):
     disable_all_buttons()
     
     if not can_use_gate(current_flight['aircraft'], gate):
+        # Lose a life for wrong gate
+        lives -= 1
+        update_lives_display()
+        
         if is_widebody(current_flight['aircraft']):
-            messagebox.showerror("Gate Too Small", f"❌ {current_flight['aircraft']} is a WIDEBODY!\n\nToo large for A gates. Must use B gates.\n\nScore penalty: -5 points")
-            result_label.config(text=f"❌ Widebody cannot fit in Gate {gate}")
+            messagebox.showerror("Gate Too Small", f"❌ {current_flight['aircraft']} is a WIDEBODY!\n\nToo large for A gates. Must use B gates.\n\n💔 Lost 1 life!")
+            result_label.config(text=f"❌ Widebody cannot fit in Gate {gate} | Lives: {lives}")
         else:
-            messagebox.showerror("Gate Too Large", f"❌ {current_flight['aircraft']} is a NARROWBODY!\n\nToo small for B gates. Must use A gates.\n\nScore penalty: -5 points")
-            result_label.config(text=f"❌ Narrowbody must use A gates, not {gate}")
-        score -= 5
-        score_label.config(text=f"Score: {score}")
+            messagebox.showerror("Gate Too Large", f"❌ {current_flight['aircraft']} is a NARROWBODY!\n\nToo small for B gates. Must use A gates.\n\n💔 Lost 1 life!")
+            result_label.config(text=f"❌ Narrowbody must use A gates, not {gate} | Lives: {lives}")
         
         # Check for game over
-        if score < 0:
+        if lives <= 0:
             game_over = True
             show_end_game_dialog(False, score)
             return
@@ -401,6 +382,10 @@ time_label.pack(pady=2)
 flight_label = tk.Label(header_frame, text="", font=("Arial", 10, "bold"), 
                         bg="#34495e", fg="#f39c12")
 flight_label.pack(pady=2)
+
+lives_label = tk.Label(header_frame, text="Lives: ❤️❤️❤️", font=("Arial", 11, "bold"),
+                      bg="#34495e", fg="#e74c3c")
+lives_label.pack(pady=2)
 
 score_label = tk.Label(header_frame, text=f"Score: {score}", font=("Arial", 10, "bold"),
                        bg="#34495e", fg="#2ecc71")
@@ -537,11 +522,17 @@ def show_main_menu():
 • Terminal A: Narrowbody → Domestic
 • Terminal B: Widebody → International
 
-📊 SCORING:
-• ✅ Narrowbody: +10  |  ✅ Widebody: +20
-• ❌ Wrong type: -5  |  ⏰ Timeout: -10
+� LIVES SYSTEM:
+• Start with 3 lives: ❤️❤️❤️
+• Wrong gate type: -1 life
+• Timeout (3 seconds): -1 life
+• Lose all lives = GAME OVER
 
-⚠️ LOSE: Score < 0  |  🎉 WIN: Reach 5 PM"""
+�📊 SCORING:
+• ✅ Narrowbody: +10  |  ✅ Widebody: +20
+• Score is for bragging rights only!
+
+🎉 WIN: Reach 5 PM with lives remaining"""
     
     instructions_label = tk.Label(instructions_frame, text=instructions_text,
                                  font=("Arial", 10), bg="#34495e", fg="white",
