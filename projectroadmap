@@ -2,7 +2,7 @@
 [x] Step 2: Download and clone the repository from GitHub and review the code.
 [x] Step 3: Ensure repository is properly linked to GitHub and changes are reflecting accordingly.
 [x] Step 4: Modified redundant card setup info to define airplane types/models
-[] Step 5: 
+[x] Step 5: Changed countdown timer from 3 to 5 seconds and changed color scheme
 [] Step 6
 [] Step 7
 [] Step 8
