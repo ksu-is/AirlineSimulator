@@ -4,7 +4,7 @@
 [x] Step 4: Modified redundant card setup info to define airplane types/models
 [x] Step 5: Changed countdown timer from 3 to 5 seconds and changed color scheme
 [x] Step 6: Updated instructions to match new game timer settings
-[x] Step 7: Added a pause button to make the game easier.
+[x] Step 7: Added a pause button to make the game less difficult.
 [x] Step 8: Added a "hint" option to allow the user to learn the city codes for each airport 
-[] Step 9
+[x] Step 9: Created an option in the menu to play on easy or hard mode for user personal preference
 [] Step 10

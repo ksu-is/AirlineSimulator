@@ -18,14 +18,35 @@ game_time = None  # Current game time (9am to 5pm)
 game_time_start = None  # Start of shift
 game_time_end = None  # End of shift
 time_timer = None  # Timer for game clock
-assignment_timer = None  # Timer for 3-second countdown
+assignment_timer = None  # Timer for 5-second countdown
 game_over = False  # Track if game is over
-countdown_remaining = 3  # Countdown seconds remaining
+countdown_remaining = 5  # Countdown seconds remaining
+game_paused = False  # Track if game is paused
+hint_used = False  # Track if hint was used for current flight
+difficulty = "easy"  # Game difficulty: "easy" or "hard"
 
 narrowbody_aircraft = ["A220", "B737", "B757", "E175", "CRJ900", "B717", "A321"]
 widebody_aircraft = ["B777", "B787", "A350", "A330", "B767", "A380", "B787"]
 narrowbody_gates = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"]
 widebody_gates = ["B1", "B2", "B3", "B4", "B5"]
+
+# Airport code to city name mapping
+airport_cities = {
+    # Domestic
+    "ATL": "Atlanta", "MSP": "Minneapolis", "DTW": "Detroit", "SLC": "Salt Lake City",
+    "LAX": "Los Angeles", "JFK": "New York", "BOS": "Boston", "SEA": "Seattle",
+    "DEN": "Denver", "ORD": "Chicago", "MIA": "Miami", "MCO": "Orlando",
+    "LAS": "Las Vegas", "PHX": "Phoenix", "SFO": "San Francisco", "DCA": "Washington DC",
+    "PDX": "Portland", "SAN": "San Diego", "TPA": "Tampa", "AUS": "Austin",
+    "RDU": "Raleigh", "CLT": "Charlotte", "PHL": "Philadelphia", "BWI": "Baltimore",
+    # International
+    "LHR": "London", "CDG": "Paris", "AMS": "Amsterdam", "FCO": "Rome",
+    "BCN": "Barcelona", "MAD": "Madrid", "FRA": "Frankfurt", "MUC": "Munich",
+    "HND": "Tokyo", "ICN": "Seoul", "PVG": "Shanghai", "HKG": "Hong Kong",
+    "SYD": "Sydney", "MEL": "Melbourne", "GRU": "São Paulo", "EZE": "Buenos Aires",
+    "SCL": "Santiago", "CPH": "Copenhagen", "NCE": "Nice", "BER": "Berlin",
+    "ARN": "Stockholm", "LIS": "Lisbon", "DUB": "Dublin", "ZRH": "Zurich"
+}
 
 def is_widebody(aircraft):
     return aircraft in widebody_aircraft
@@ -120,7 +141,7 @@ def show_end_game_dialog(is_win, final_score):
 def restart_game(dialog=None):
     """Restart the game from beginning"""
     global score, lives, available_gates, occupied_gates, departure_timers, current_flight
-    global game_time, game_time_start, game_time_end, game_over, assignment_timer, time_timer
+    global game_time, game_time_start, game_time_end, game_over, assignment_timer, time_timer, game_paused, hint_used
     
     # Close dialog if exists
     if dialog:
@@ -128,6 +149,8 @@ def restart_game(dialog=None):
     
     # Reset game state
     game_over = False
+    game_paused = False
+    hint_used = False
     score = 0
     lives = 3
     available_gates = all_gates.copy()
@@ -154,6 +177,8 @@ def restart_game(dialog=None):
     time_label.config(text=f"Time: {game_time.strftime('%I:%M %p')}")
     result_label.config(text="")
     countdown_label.config(text="")
+    pause_btn.config(text="⏸ Pause", bg="#3498db")
+    hint_btn.config(text="💡 Get Hint", bg="#f39c12", state=tk.NORMAL)
     
     # Clear all departure notifications
     for gate in departure_labels:
@@ -165,9 +190,67 @@ def restart_game(dialog=None):
     update_game_time()
     next_flight()
 
+def toggle_pause():
+    """Toggle game pause state"""
+    global game_paused
+    
+    if game_over:
+        return
+    
+    game_paused = not game_paused
+    
+    if game_paused:
+        # Pause the game
+        pause_btn.config(text="▶ Resume", bg="#2ecc71")
+        result_label.config(text="⏸️ GAME PAUSED ⏸️", fg="#f39c12")
+        disable_all_buttons()
+        
+        # Cancel timers
+        if assignment_timer:
+            root.after_cancel(assignment_timer)
+        if time_timer:
+            root.after_cancel(time_timer)
+    else:
+        # Resume the game
+        pause_btn.config(text="⏸ Pause", bg="#3498db")
+        result_label.config(text="")
+        enable_all_buttons()
+        
+        # Restart timers
+        update_game_time()
+        start_assignment_countdown()
+
+def show_hint():
+    """Show the city name for the current flight destination"""
+    global hint_used
+    
+    if difficulty == "hard":
+        messagebox.showinfo("Hard Mode", "Hints are not available in Hard Mode!")
+        return
+    
+    if game_over or game_paused or not current_flight:
+        return
+    
+    if hint_used:
+        messagebox.showinfo("Hint Already Used", "You've already used the hint for this flight!")
+        return
+    
+    hint_used = True
+    airport_code = current_flight['destination']
+    city_name = airport_cities.get(airport_code, "Unknown City")
+    
+    # Update hint button to show it was used
+    hint_btn.config(text="💡 Hint Used", bg="#95a5a6", state=tk.DISABLED)
+    
+    # Show the city name in a message box
+    messagebox.showinfo("Destination Hint", 
+                       f"✈️ Flight {current_flight['flight']}\n\n"
+                       f"Destination: {airport_code} - {city_name}\n\n"
+                       f"Aircraft: {current_flight['aircraft']}")
+
 def depart_plane(gate):
     global game_over
-    if game_over:
+    if game_over or game_paused:
         return
     
     if gate in occupied_gates:
@@ -190,7 +273,7 @@ def schedule_departure(gate, flight_info):
 
 def update_game_time():
     global game_time, time_timer, game_over
-    if game_over:
+    if game_over or game_paused:
         return
     
     # Advance time by 5 minutes per tick (10 seconds real time = 1 hour game time = 12 ticks)
@@ -215,11 +298,11 @@ def update_lives_display():
 
 def update_countdown_display():
     global countdown_remaining, assignment_timer, game_over
-    if game_over:
+    if game_over or game_paused:
         return
     
     if countdown_remaining > 0:
-        colors = {3: "#3498db", 2: "#f39c12", 1: "#e74c3c"}
+        colors = {5: "#3498db", 4: "#3498db", 3: "#3498db", 2: "#f39c12", 1: "#e74c3c"}
         text = f"⚠️ {countdown_remaining} ⚠️" if countdown_remaining == 1 else f"⏰ {countdown_remaining}"
         countdown_label.config(text=text, fg=colors[countdown_remaining], font=("Arial", 24, "bold"))
         
@@ -237,9 +320,9 @@ def start_assignment_countdown():
     if assignment_timer:
         root.after_cancel(assignment_timer)
     
-    # Reset countdown to 3 seconds
-    countdown_remaining = 3
-    countdown_label.config(text="⏰ 3", fg="#3498db", font=("Arial", 24, "bold"))
+    # Reset countdown to 5 seconds
+    countdown_remaining = 5
+    countdown_label.config(text="⏰ 5", fg="#3498db", font=("Arial", 24, "bold"))
     
     # Start countdown display updates
     assignment_timer = root.after(1000, update_countdown_display)
@@ -265,9 +348,14 @@ def assignment_timeout():
     root.after(1000, next_flight)
 
 def next_flight():
-    global current_flight, game_over
-    if game_over:
+    global current_flight, game_over, hint_used
+    if game_over or game_paused:
         return
+    
+    # Reset hint for new flight (only in easy mode)
+    hint_used = False
+    if difficulty == "easy":
+        hint_btn.config(text="💡 Get Hint", bg="#f39c12", state=tk.NORMAL)
     
     current_flight = generate_flight()
     flight_label.config(
@@ -276,7 +364,7 @@ def next_flight():
     result_label.config(text="")
     enable_all_buttons()
     
-    # Start 3-second countdown
+    # Start 5-second countdown
     start_assignment_countdown()
 
 def disable_all_buttons():
@@ -307,7 +395,7 @@ def update_gate_display():
 
 def assign_gate(gate):
     global score, assignment_timer, game_over, lives
-    if game_over:
+    if game_over or game_paused:
         return
     
     # Cancel the 3-second countdown timer
@@ -395,6 +483,18 @@ countdown_label = tk.Label(header_frame, text="", font=("Arial", 20, "bold"),
                           bg="#34495e", fg="#3498db")
 countdown_label.pack(pady=5)
 
+# Pause button
+pause_btn = tk.Button(header_frame, text="⏸ Pause", command=toggle_pause,
+                     bg="#3498db", fg="white", font=("Arial", 10, "bold"),
+                     width=12, height=1, relief=tk.RAISED, bd=2)
+pause_btn.pack(pady=5)
+
+# Hint button
+hint_btn = tk.Button(header_frame, text="💡 Get Hint", command=show_hint,
+                    bg="#f39c12", fg="white", font=("Arial", 10, "bold"),
+                    width=12, height=1, relief=tk.RAISED, bd=2)
+hint_btn.pack(pady=2)
+
 map_frame = tk.Frame(root, bg="#2c3e50")
 
 # Terminal A - Left side (vertical, green)
@@ -474,9 +574,12 @@ result_label = tk.Label(control_frame, text="", font=("Arial", 11, "bold"),
                         bg="#34495e", fg="white")
 result_label.pack(pady=10)
 
-def start_game_from_menu(menu_frame):
+def start_game_from_menu(menu_frame, selected_difficulty):
     """Start the game after dismissing the menu"""
-    global game_time_start, game_time, game_time_end
+    global game_time_start, game_time, game_time_end, difficulty
+    
+    # Set difficulty
+    difficulty = selected_difficulty
     
     # Hide menu
     menu_frame.destroy()
@@ -485,6 +588,10 @@ def start_game_from_menu(menu_frame):
     header_frame.pack(fill=tk.X, padx=10, pady=5)
     map_frame.pack(padx=20, pady=15)
     control_frame.pack(padx=10, pady=5, fill=tk.X)
+    
+    # Hide hint button in hard mode
+    if difficulty == "hard":
+        hint_btn.pack_forget()
     
     # Initialize game time (9am start)
     game_time_start = datetime.now().replace(hour=9, minute=0, second=0, microsecond=0)
@@ -516,14 +623,14 @@ def show_main_menu():
     instructions_text = """🎯 OBJECTIVE: Survive 8-hour shift (9 AM - 5 PM)
 
 ⏰ RULES:
-• Assign flights to gates within 3 SECONDS
+• Assign flights to gates within 5 SECONDS
 • Terminal A: Narrowbody → Domestic
 • Terminal B: Widebody → International
 
 � LIVES SYSTEM:
 • Start with 3 lives: ❤️❤️❤️
 • Wrong gate type: -1 life
-• Timeout (3 seconds): -1 life
+• Timeout (5 seconds): -1 life
 • Lose all lives = GAME OVER
 
 �📊 SCORING:
@@ -537,13 +644,32 @@ def show_main_menu():
                                  justify=tk.LEFT, padx=20, pady=10)
     instructions_label.pack()
     
-    # Start button - IMPORTANT!
-    start_button = tk.Button(menu_frame, text="▶ START GAME", 
-                            command=lambda: start_game_from_menu(menu_frame),
-                            bg="#2ecc71", fg="white", font=("Arial", 14, "bold"),
-                            width=20, height=2, relief=tk.RAISED, bd=5,
-                            cursor="hand2")
-    start_button.pack(pady=20)
+    # Difficulty selection frame
+    difficulty_frame = tk.Frame(menu_frame, bg="#2c3e50")
+    difficulty_frame.pack(pady=15)
+    
+    difficulty_label = tk.Label(difficulty_frame, text="SELECT DIFFICULTY:",
+                               font=("Arial", 12, "bold"), bg="#2c3e50", fg="white")
+    difficulty_label.pack(pady=5)
+    
+    button_container = tk.Frame(difficulty_frame, bg="#2c3e50")
+    button_container.pack(pady=10)
+    
+    # Easy mode button
+    easy_button = tk.Button(button_container, text="🟢 EASY MODE\n(Hints Available)", 
+                           command=lambda: start_game_from_menu(menu_frame, "easy"),
+                           bg="#2ecc71", fg="white", font=("Arial", 12, "bold"),
+                           width=18, height=3, relief=tk.RAISED, bd=5,
+                           cursor="hand2")
+    easy_button.pack(side=tk.LEFT, padx=10)
+    
+    # Hard mode button
+    hard_button = tk.Button(button_container, text="🔴 HARD MODE\n(No Hints)", 
+                           command=lambda: start_game_from_menu(menu_frame, "hard"),
+                           bg="#e74c3c", fg="white", font=("Arial", 12, "bold"),
+                           width=18, height=3, relief=tk.RAISED, bd=5,
+                           cursor="hand2")
+    hard_button.pack(side=tk.LEFT, padx=10)
     
     # Credits
     credits = tk.Label(menu_frame, text="Good luck, Rookie Dispatcher! 🛫",
