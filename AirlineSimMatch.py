@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 # --- Game setup ---
 score = 0
-lives = 3
+lives = 5  # Will be set based on difficulty (5 for easy, 3 for hard)
 all_gates = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "B1", "B2", "B3", "B4", "B5"]
 available_gates = all_gates.copy()
 current_flight = None
@@ -18,9 +18,9 @@ game_time = None  # Current game time (9am to 5pm)
 game_time_start = None  # Start of shift
 game_time_end = None  # End of shift
 time_timer = None  # Timer for game clock
-assignment_timer = None  # Timer for 5-second countdown
+assignment_timer = None  # Timer for assignment countdown
 game_over = False  # Track if game is over
-countdown_remaining = 5  # Countdown seconds remaining
+countdown_remaining = 5  # Countdown seconds remaining (5 seconds)
 game_paused = False  # Track if game is paused
 hint_used = False  # Track if hint was used for current flight
 difficulty = "easy"  # Game difficulty: "easy" or "hard"
@@ -152,7 +152,7 @@ def restart_game(dialog=None):
     game_paused = False
     hint_used = False
     score = 0
-    lives = 3
+    lives = 5 if difficulty == "easy" else 3
     available_gates = all_gates.copy()
     occupied_gates = {}
     departure_timers = {}
@@ -173,7 +173,7 @@ def restart_game(dialog=None):
     
     # Update displays
     score_label.config(text=f"Score: {score}")
-    lives_label.config(text="Lives: ❤️❤️❤️")
+    lives_label.config(text=f"Lives: {'❤️' * lives}")
     time_label.config(text=f"Time: {game_time.strftime('%I:%M %p')}")
     result_label.config(text="")
     countdown_label.config(text="")
@@ -254,7 +254,6 @@ def depart_plane(gate):
         return
     
     if gate in occupied_gates:
-        flight_info = occupied_gates[gate]
         available_gates.append(gate)
         del occupied_gates[gate]
         
@@ -398,7 +397,7 @@ def assign_gate(gate):
     if game_over or game_paused:
         return
     
-    # Cancel the 3-second countdown timer
+    # Cancel the countdown timer
     if assignment_timer:
         root.after_cancel(assignment_timer)
         assignment_timer = None
@@ -576,10 +575,13 @@ result_label.pack(pady=10)
 
 def start_game_from_menu(menu_frame, selected_difficulty):
     """Start the game after dismissing the menu"""
-    global game_time_start, game_time, game_time_end, difficulty
+    global game_time_start, game_time, game_time_end, difficulty, lives
     
     # Set difficulty
     difficulty = selected_difficulty
+    
+    # Set lives based on difficulty
+    lives = 5 if difficulty == "easy" else 3
     
     # Hide menu
     menu_frame.destroy()
@@ -588,6 +590,9 @@ def start_game_from_menu(menu_frame, selected_difficulty):
     header_frame.pack(fill=tk.X, padx=10, pady=5)
     map_frame.pack(padx=20, pady=15)
     control_frame.pack(padx=10, pady=5, fill=tk.X)
+    
+    # Update lives display
+    lives_label.config(text=f"Lives: {'❤️' * lives}")
     
     # Hide hint button in hard mode
     if difficulty == "hard":
@@ -627,13 +632,14 @@ def show_main_menu():
 • Terminal A: Narrowbody → Domestic
 • Terminal B: Widebody → International
 
-� LIVES SYSTEM:
-• Start with 3 lives: ❤️❤️❤️
+💔 LIVES SYSTEM:
+• Easy Mode: 5 lives ❤️❤️❤️❤️❤️
+• Hard Mode: 3 lives ❤️❤️❤️
 • Wrong gate type: -1 life
 • Timeout (5 seconds): -1 life
 • Lose all lives = GAME OVER
 
-�📊 SCORING:
+📊 SCORING:
 • ✅ Narrowbody: +10  |  ✅ Widebody: +20
 • Score is for bragging rights only!
 
