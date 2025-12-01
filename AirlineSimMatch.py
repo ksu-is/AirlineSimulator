@@ -424,7 +424,7 @@ def next_flight():
     result_label.config(text="")
     enable_all_buttons()
     
-    # Start 5-second countdown
+    # Start countdown timer (5 seconds easy, 3 seconds hard)
     start_assignment_countdown()
 
 def disable_all_buttons():
