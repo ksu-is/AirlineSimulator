@@ -104,7 +104,7 @@ def show_end_game_dialog(is_win, final_score):
     dialog = tk.Toplevel(root)
     dialog.title("Game Over" if not is_win else "Shift Complete!")
     dialog.geometry("400x250")
-    dialog.config(bg="#34495e")
+    dialog.config(bg="#5B9BD5")
     dialog.transient(root)
     dialog.grab_set()
     
@@ -118,14 +118,14 @@ def show_end_game_dialog(is_win, final_score):
         title_color = "#e74c3c"
     
     title_label = tk.Label(dialog, text=title_text, font=("Arial", 16, "bold"),
-                          bg="#34495e", fg=title_color)
+                          bg="#5B9BD5", fg=title_color)
     title_label.pack(pady=20)
     
     message_label = tk.Label(dialog, text=message_text, font=("Arial", 12),
-                            bg="#34495e", fg="white", justify=tk.CENTER)
+                            bg="#5B9BD5", fg="white", justify=tk.CENTER)
     message_label.pack(pady=20)
     
-    button_frame = tk.Frame(dialog, bg="#34495e")
+    button_frame = tk.Frame(dialog, bg="#5B9BD5")
     button_frame.pack(pady=20)
     
     replay_btn = tk.Button(button_frame, text="🔄 Play Again", command=lambda: restart_game(dialog),
@@ -512,35 +512,35 @@ def assign_gate(gate):
 root = tk.Tk()
 root.title("Airport Operations Simulator")
 root.geometry("700x600")
-root.config(bg="#2c3e50")
+root.config(bg="#87CEEB")  # Simple sky blue background
 
 # Header section (create but don't pack yet)
-header_frame = tk.Frame(root, bg="#34495e", relief=tk.RAISED, bd=2)
+header_frame = tk.Frame(root, bg="#5B9BD5", relief=tk.RAISED, bd=2)
 
 title_label = tk.Label(header_frame, text="✈️ AIRPORT OPERATIONS SIMULATOR ✈️", 
-                       font=("Arial", 13, "bold"), bg="#34495e", fg="white")
+                       font=("Arial", 13, "bold"), bg="#5B9BD5", fg="white")
 title_label.pack(pady=5)
 
 # Time display
 time_label = tk.Label(header_frame, text="Time: 09:00 AM", font=("Arial", 10, "bold"),
-                     bg="#34495e", fg="#3498db")
+                     bg="#5B9BD5", fg="white")
 time_label.pack(pady=2)
 
 flight_label = tk.Label(header_frame, text="", font=("Arial", 10, "bold"), 
-                        bg="#34495e", fg="#f39c12")
+                        bg="#5B9BD5", fg="white")
 flight_label.pack(pady=2)
 
 lives_label = tk.Label(header_frame, text="Lives: ❤️❤️❤️", font=("Arial", 11, "bold"),
-                      bg="#34495e", fg="#e74c3c")
+                      bg="#5B9BD5", fg="white")
 lives_label.pack(pady=2)
 
 score_label = tk.Label(header_frame, text=f"Score: {score}", font=("Arial", 10, "bold"),
-                       bg="#34495e", fg="#2ecc71")
+                       bg="#5B9BD5", fg="white")
 score_label.pack(pady=2)
 
 # Countdown timer display 
 countdown_label = tk.Label(header_frame, text="", font=("Arial", 20, "bold"),
-                          bg="#34495e", fg="#3498db")
+                          bg="#5B9BD5", fg="white")
 countdown_label.pack(pady=5)
 
 # Pause/Quit button (will be configured based on difficulty)
@@ -555,7 +555,7 @@ hint_btn = tk.Button(header_frame, text="💡 Get Hint", command=show_hint,
                     width=12, height=1, relief=tk.RAISED, bd=2)
 hint_btn.pack(pady=2)
 
-map_frame = tk.Frame(root, bg="#2c3e50")
+map_frame = tk.Frame(root, bg="#87CEEB")
 
 # Terminal A - Left side (vertical, green)
 terminal_a_frame = tk.Frame(map_frame, bg="#27ae60", relief=tk.RIDGE, bd=4)
@@ -628,10 +628,10 @@ for gate in ["B1", "B2", "B3", "B4", "B5"]:
     departure_labels[gate] = departure_notif
 
 # Control panel section (create but don't pack yet)
-control_frame = tk.Frame(root, bg="#34495e", relief=tk.RAISED, bd=3)
+control_frame = tk.Frame(root, bg="#5B9BD5", relief=tk.RAISED, bd=3)
 
 result_label = tk.Label(control_frame, text="", font=("Arial", 11, "bold"), 
-                        bg="#34495e", fg="white")
+                        bg="#5B9BD5", fg="white")
 result_label.pack(pady=10)
 
 def start_game_from_menu(menu_frame, selected_difficulty):
@@ -676,20 +676,20 @@ def start_game_from_menu(menu_frame, selected_difficulty):
 
 def show_main_menu():
     """Display the main menu with instructions"""
-    menu_frame = tk.Frame(root, bg="#2c3e50")
+    menu_frame = tk.Frame(root, bg="#87CEEB")
     menu_frame.pack(fill=tk.BOTH, expand=True)
     
     # Title
     title = tk.Label(menu_frame, text="✈️ AIRPORT OPERATIONS SIMULATOR ✈️",
-                    font=("Arial", 18, "bold"), bg="#2c3e50", fg="white")
+                    font=("Arial", 18, "bold"), bg="#87CEEB", fg="white")
     title.pack(pady=15)
     
     # Instructions panel
-    instructions_frame = tk.Frame(menu_frame, bg="#34495e", relief=tk.RIDGE, bd=5)
+    instructions_frame = tk.Frame(menu_frame, bg="#5B9BD5", relief=tk.RIDGE, bd=5)
     instructions_frame.pack(padx=40, pady=10)
     
     instructions_title = tk.Label(instructions_frame, text="📋 HOW TO PLAY",
-                                 font=("Arial", 14, "bold"), bg="#34495e", fg="#3498db")
+                                 font=("Arial", 14, "bold"), bg="#5B9BD5", fg="white")
     instructions_title.pack(pady=10)
     
     instructions_text = """🎯 OBJECTIVE: Survive 8-hour shift (9 AM - 5 PM)
@@ -712,19 +712,19 @@ def show_main_menu():
 🎉 WIN: Reach 5 PM with lives remaining"""
     
     instructions_label = tk.Label(instructions_frame, text=instructions_text,
-                                 font=("Arial", 10), bg="#34495e", fg="white",
+                                 font=("Arial", 10), bg="#5B9BD5", fg="white",
                                  justify=tk.LEFT, padx=20, pady=10)
     instructions_label.pack()
     
     # Difficulty selection frame
-    difficulty_frame = tk.Frame(menu_frame, bg="#2c3e50")
+    difficulty_frame = tk.Frame(menu_frame, bg="#87CEEB")
     difficulty_frame.pack(pady=15)
     
     difficulty_label = tk.Label(difficulty_frame, text="SELECT DIFFICULTY:",
-                               font=("Arial", 12, "bold"), bg="#2c3e50", fg="white")
+                               font=("Arial", 12, "bold"), bg="#87CEEB", fg="white")
     difficulty_label.pack(pady=5)
     
-    button_container = tk.Frame(difficulty_frame, bg="#2c3e50")
+    button_container = tk.Frame(difficulty_frame, bg="#87CEEB")
     button_container.pack(pady=10)
     
     # Easy mode button
@@ -745,12 +745,12 @@ def show_main_menu():
     
     # Credits
     credits = tk.Label(menu_frame, text="Good luck, Rookie Dispatcher! 🛫",
-                      font=("Arial", 9, "italic"), bg="#2c3e50", fg="#95a5a6")
+                      font=("Arial", 9, "italic"), bg="#87CEEB", fg="white")
     credits.pack(pady=5)
     
     # Designer credit
     designer = tk.Label(menu_frame, text="Game designed by Rowan Seskin and Gabrielle Godfrey",
-                       font=("Arial", 8), bg="#2c3e50", fg="#7f8c8d")
+                       font=("Arial", 8), bg="#87CEEB", fg="white")
     designer.pack(side=tk.BOTTOM, pady=10)
 
 # Show main menu first (game elements not packed yet, so they're hidden)
