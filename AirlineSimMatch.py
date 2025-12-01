@@ -20,7 +20,7 @@ game_time_end = None  # End of shift
 time_timer = None  # Timer for game clock
 assignment_timer = None  # Timer for assignment countdown
 game_over = False  # Track if game is over
-countdown_remaining = 5  # Countdown seconds remaining (5 seconds)
+countdown_remaining = 5  # Countdown seconds remaining (5 easy, 3 hard)
 game_paused = False  # Track if game is paused
 hint_used = False  # Track if hint was used for current flight
 difficulty = "easy"  # Game difficulty: "easy" or "hard"
@@ -265,7 +265,7 @@ def depart_plane(gate):
         enable_all_buttons()
         update_gate_display()
 
-def schedule_departure(gate, flight_info):
+def schedule_departure(gate):
     departure_time = random.randint(5000, 20000)
     timer_id = root.after(departure_time, lambda: depart_plane(gate))
     departure_timers[gate] = timer_id
@@ -301,9 +301,15 @@ def update_countdown_display():
         return
     
     if countdown_remaining > 0:
-        colors = {5: "#3498db", 4: "#3498db", 3: "#3498db", 2: "#f39c12", 1: "#e74c3c"}
+        # Colors: blue for safe, orange for warning, red for danger
+        if countdown_remaining >= 3:
+            color = "#3498db"  # Blue
+        elif countdown_remaining == 2:
+            color = "#f39c12"  # Orange
+        else:
+            color = "#e74c3c"  # Red
         text = f"⚠️ {countdown_remaining} ⚠️" if countdown_remaining == 1 else f"⏰ {countdown_remaining}"
-        countdown_label.config(text=text, fg=colors[countdown_remaining], font=("Arial", 24, "bold"))
+        countdown_label.config(text=text, fg=color, font=("Arial", 24, "bold"))
         
         countdown_remaining -= 1
         assignment_timer = root.after(1000, update_countdown_display)
@@ -319,9 +325,9 @@ def start_assignment_countdown():
     if assignment_timer:
         root.after_cancel(assignment_timer)
     
-    # Reset countdown to 5 seconds
-    countdown_remaining = 5
-    countdown_label.config(text="⏰ 5", fg="#3498db", font=("Arial", 24, "bold"))
+    # Set countdown based on difficulty (5 seconds for easy, 3 for hard)
+    countdown_remaining = 5 if difficulty == "easy" else 3
+    countdown_label.config(text=f"⏰ {countdown_remaining}", fg="#3498db", font=("Arial", 24, "bold"))
     
     # Start countdown display updates
     assignment_timer = root.after(1000, update_countdown_display)
@@ -443,7 +449,7 @@ def assign_gate(gate):
     score += points
     score_label.config(text=f"Score: {score}")
     
-    schedule_departure(gate, current_flight)
+    schedule_departure(gate)
     update_gate_display()
     root.after(1000, next_flight)
 
@@ -628,15 +634,14 @@ def show_main_menu():
     instructions_text = """🎯 OBJECTIVE: Survive 8-hour shift (9 AM - 5 PM)
 
 ⏰ RULES:
-• Assign flights to gates within 5 SECONDS
+• Easy Mode: 5 SECOND timer, 5 lives ❤️❤️❤️❤️❤️
+• Hard Mode: 3 SECOND timer, 3 lives ❤️❤️❤️
 • Terminal A: Narrowbody → Domestic
 • Terminal B: Widebody → International
 
-💔 LIVES SYSTEM:
-• Easy Mode: 5 lives ❤️❤️❤️❤️❤️
-• Hard Mode: 3 lives ❤️❤️❤️
+💔 PENALTIES:
 • Wrong gate type: -1 life
-• Timeout (5 seconds): -1 life
+• Timeout: -1 life
 • Lose all lives = GAME OVER
 
 📊 SCORING:
