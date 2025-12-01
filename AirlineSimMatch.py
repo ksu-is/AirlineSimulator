@@ -177,7 +177,10 @@ def restart_game(dialog=None):
     time_label.config(text=f"Time: {game_time.strftime('%I:%M %p')}")
     result_label.config(text="")
     countdown_label.config(text="")
-    pause_btn.config(text="⏸ Pause", bg="#3498db")
+    if difficulty == "hard":
+        pause_btn.config(text="🏠 Main Menu", command=return_to_main_menu, bg="#e74c3c")
+    else:
+        pause_btn.config(text="⏸ Pause", command=toggle_pause, bg="#3498db")
     hint_btn.config(text="💡 Get Hint", bg="#f39c12", state=tk.NORMAL)
     
     # Clear all departure notifications
@@ -219,6 +222,58 @@ def toggle_pause():
         # Restart timers
         update_game_time()
         start_assignment_countdown()
+
+def return_to_main_menu():
+    """Return to main menu from active game"""
+    global game_over, game_paused, score, lives, available_gates, occupied_gates, departure_timers, current_flight
+    global game_time, game_time_start, game_time_end, assignment_timer, time_timer, hint_used
+    
+    # Cancel all timers first
+    if time_timer:
+        root.after_cancel(time_timer)
+        time_timer = None
+    if assignment_timer:
+        root.after_cancel(assignment_timer)
+        assignment_timer = None
+    for timer_id in list(departure_timers.values()):
+        root.after_cancel(timer_id)
+    
+    # Reset game state completely
+    game_over = False
+    game_paused = False
+    score = 0
+    lives = 5
+    available_gates = all_gates.copy()
+    occupied_gates = {}
+    departure_timers = {}
+    current_flight = None
+    hint_used = False
+    game_time = None
+    game_time_start = None
+    game_time_end = None
+    
+    # Reset all gate displays and buttons
+    update_gate_display()
+    for gate in plane_labels:
+        plane_labels[gate].config(text="")
+    for gate in departure_labels:
+        departure_labels[gate].config(text="")
+    
+    # Reset UI labels
+    score_label.config(text="Score: 0")
+    lives_label.config(text="Lives: ❤️❤️❤️")
+    time_label.config(text="Time: 09:00 AM")
+    flight_label.config(text="")
+    result_label.config(text="")
+    countdown_label.config(text="")
+    
+    # Hide game elements
+    header_frame.pack_forget()
+    map_frame.pack_forget()
+    control_frame.pack_forget()
+    
+    # Show main menu
+    show_main_menu()
 
 def show_hint():
     """Show the city name for the current flight destination"""
@@ -488,7 +543,7 @@ countdown_label = tk.Label(header_frame, text="", font=("Arial", 20, "bold"),
                           bg="#34495e", fg="#3498db")
 countdown_label.pack(pady=5)
 
-# Pause button
+# Pause/Quit button (will be configured based on difficulty)
 pause_btn = tk.Button(header_frame, text="⏸ Pause", command=toggle_pause,
                      bg="#3498db", fg="white", font=("Arial", 10, "bold"),
                      width=12, height=1, relief=tk.RAISED, bd=2)
@@ -599,6 +654,12 @@ def start_game_from_menu(menu_frame, selected_difficulty):
     
     # Update lives display
     lives_label.config(text=f"Lives: {'❤️' * lives}")
+    
+    # Configure pause/quit button based on difficulty
+    if difficulty == "hard":
+        pause_btn.config(text="🏠 Main Menu", command=return_to_main_menu, bg="#e74c3c")
+    else:
+        pause_btn.config(text="⏸ Pause", command=toggle_pause, bg="#3498db")
     
     # Hide hint button in hard mode
     if difficulty == "hard":
